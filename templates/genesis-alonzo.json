@@ -4,7 +4,8 @@
         "prMem": 5.77e-2,
         "prSteps": 7.21e-5
     },
-    "lovelacePerUTxOWord": 34482,
+    "lovelacePerUTxOWord": 0,
+    "coinsPerUTxOByte": 0,
     "maxBlockExUnits": {
         "exUnitsMem": 62000000,
         "exUnitsSteps": 40000000000
