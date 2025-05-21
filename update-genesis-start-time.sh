@@ -33,7 +33,7 @@ echo "Updating genesis using following environments variables:
 EPOCH_LENGTH=`perl -E "say ((10 * $K) / $F)"`
 EPOCH_LENGTH_MINUTES=`perl -E "say (($EPOCH_LENGTH / 60) * $SLOT_LENGTH )"`
 EPOCH_LENGTH_MINUTES_INT=${EPOCH_LENGTH_MINUTES%.*}
-RETURN_ADDRESS=$(cat keys/utxo-keys/utxo1_stk.addr)
+RETURN_ADDRESS=$(cat keys/utxo-keys/stake.addr)
 
 
 
