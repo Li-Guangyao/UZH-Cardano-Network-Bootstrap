@@ -51,7 +51,7 @@ cardano-cli babbage transaction build \
     ${tx_in} \
     --tx-out $SEND_ADDR+$FAUCET_AMOUNT \
     --change-address $(cat $UTXO_KEYS_PATH/payment.addr) \
-    $TESTNET_MAGIC \
+    $TESTNET_MAGIC $SOCKET_PATH \
     --out-file $TXS_PATH/tx_faucet.raw
 
 cardano-cli babbage transaction sign \
@@ -61,7 +61,7 @@ cardano-cli babbage transaction sign \
 
 cardano-cli babbage transaction txid --tx-file $TXS_PATH/tx_faucet.signed
 
-cardano-cli babbage transaction submit --tx-file $TXS_PATH/tx_faucet.signed $TESTNET_MAGIC
+cardano-cli babbage transaction submit --tx-file $TXS_PATH/tx_faucet.signed $TESTNET_MAGIC $SOCKET_PATH
 
 rm $TXS_PATH/tx_faucet.raw
 mv $TXS_PATH/tx_faucet.signed $TXS_PATH/tx_faucet.sent

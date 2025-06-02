@@ -26,25 +26,25 @@ if [ ! -d "$POOL_KEYS_PATH" ]; then
 fi
 
 # Check if the required files exist
-if [ ! -f ~/keys/node-keys/kes.skey ]; then
-    echo "Error: File kes.skey does not exist in ~/keys/node-keys. Please create it first."
+if [ ! -f ~/keys/pool-keys/kes.skey ]; then
+    echo "Error: File kes.skey does not exist in ~/keys/pool-keys. Please create it first."
     exit 1
 fi
 
-if [ ! -f ~/keys/node-keys/vrf.skey ]; then
-    echo "Error: File vrf.skey does not exist in ~/keys/node-keys. Please create it first."
+if [ ! -f ~/keys/pool-keys/vrf.skey ]; then
+    echo "Error: File vrf.skey does not exist in ~/keys/pool-keys. Please create it first."
     exit 1
 fi
 
-if [ ! -f ~/keys/node-keys/opcert.cert ]; then
-    echo "Error: File opcert.cert does not exist in ~/keys/node-keys. Please create it first."
+if [ ! -f ~/keys/pool-keys/opcert.cert ]; then
+    echo "Error: File opcert.cert does not exist in ~/keys/pool-keys. Please create it first."
     exit 1
 fi
 
 # Copy the keys
-cp ~/keys/node-keys/kes.skey $CNODE_HOME/priv/pool/$POOL_NAME/hot.skey
-cp ~/keys/node-keys/vrf.skey $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
-cp ~/keys/node-keys/opcert.cert $CNODE_HOME/priv/pool/$POOL_NAME/op.cert
+cp ~/keys/pool-keys/kes.skey $CNODE_HOME/priv/pool/$POOL_NAME/hot.skey
+cp ~/keys/pool-keys/vrf.skey $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
+cp ~/keys/pool-keys/opcert.cert $CNODE_HOME/priv/pool/$POOL_NAME/op.cert
 
 sudo chmod o-rwx $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
 sudo chmod g-rwx $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey

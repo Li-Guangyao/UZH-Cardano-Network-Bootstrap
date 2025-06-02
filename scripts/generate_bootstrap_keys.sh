@@ -7,7 +7,6 @@ if [ "$#" -ne 1 ]; then
 fi
 
 NETWORK_MAGIC="--testnet-magic 2025"
-# NETWORK_MAGIC="--mainnet"
 
 POOL_NAME=$1
 echo POOL_NAME: $POOL_NAME
