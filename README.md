@@ -325,6 +325,70 @@ The db-sync can be easily set using guild operator scripts
 USeful Queries - https://github.com/input-output-hk/cardano-db-sync/blob/master/doc/interesting-queries.md 
 
 
+### Add a watchdog script to prevent dbsync fails
+This step is optional. \
+Full Script: ~/check_dbsync.sh
+```bash
+#!/bin/bash
+
+SERVICE_NAME="cnode-dbsync.service"
+SETUP_SCRIPT="$HOME/git/cardano-db-sync/scripts/postgresql-setup.sh"
+LOG_FILE="$HOME/dbsync_watchdog.log"
+DB_PASSWORD="postgres"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
+run_setup_script() {
+expect <<EOF
+log_user 1
+set timeout 30
+spawn bash $SETUP_SCRIPT --createdb
+expect {
+    -re "(?i)password.*" {
+        send "$DB_PASSWORD\r"
+        exp_continue
+    }
+    eof
+}
+EOF
+}
+
+# Check if the service is active
+if systemctl is-active --quiet "$SERVICE_NAME"; then
+    log "Service is active. No action needed."
+else
+    log "Service is inactive. Attempting recovery..."
+
+    log "Running setup script (1st time)..."
+    run_setup_script
+
+    log "Running setup script (2nd time)..."
+    run_setup_script
+
+    log "Restarting $SERVICE_NAME..."
+    sudo systemctl restart "$SERVICE_NAME"
+
+    if systemctl is-active --quiet "$SERVICE_NAME"; then
+        log "Service restarted successfully."
+    else
+        log "Service failed to restart."
+    fi
+fi
+
+```
+
+Then:
+```bash
+chmod +x ~/check_dbsync.sh
+
+crontab -e
+# add this. To check the service every 5 minites 
+*/5 * * * * /home/YOUR_USERNAME/check_dbsync.sh
+```
+
+
 ## 4. Run Blockfrost
 ### Clone Blockfrost Repository
 ```bash
