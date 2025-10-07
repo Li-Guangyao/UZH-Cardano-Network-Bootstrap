@@ -39,8 +39,8 @@ RETURN_ADDRESS=$(cat keys/utxo-keys/stake.addr)
 
 # Create keys file
 
-# mkdir -p $CNODE_HOME/generated-keys/
-# mkdir -p $CNODE_HOME/initial-keys/
+mkdir -p $CNODE_HOME/generated-keys/
+mkdir -p $CNODE_HOME/initial-keys/
 mkdir -p $CNODE_HOME/priv/pool/$POOL_NAME
 
 # copy the config files
@@ -52,12 +52,21 @@ sed -i "s/\"protocolMagic\": [0-9]*/\"protocolMagic\": $NETWORK_MAGIC/" "templat
 sed -i "s/\"networkMagic\": [0-9]*/\"networkMagic\": $NETWORK_MAGIC/" "templates/genesis-shelley.json" 
 
 
-cp ../templates/genesis-byron.json $CNODE_HOME/files/byron-genesis.json
-cp ../templates/genesis-shelley.json $CNODE_HOME/files/shelley-genesis.json
-cp ../templates/genesis-alonzo.json $CNODE_HOME/files/alonzo-genesis.json
-cp ../templates/conway-genesis.json $CNODE_HOME/files/conway-genesis.json
+cp templates/genesis-byron.json $CNODE_HOME/files/byron-genesis.json
+cp templates/genesis-shelley.json $CNODE_HOME/files/shelley-genesis.json
+cp templates/genesis-alonzo.json $CNODE_HOME/files/alonzo-genesis.json
+cp templates/conway-genesis.json $CNODE_HOME/files/conway-genesis.json
 
-cp ../templates/cardano-node.json $CNODE_HOME/files/config.json
-cp ../templates/dbsync.json $CNODE_HOME/files/dbsync.json
-cp ../templates/topology.json $CNODE_HOME/files/topology.json
+cp templates/cardano-node.json $CNODE_HOME/files/config.json
+cp templates/dbsync.json $CNODE_HOME/files/dbsync.json
+cp templates/topology.json $CNODE_HOME/files/topology.json
 
+# copy the keys
+cp keys/pool-keys/kes.skey $CNODE_HOME/priv/pool/$POOL_NAME/hot.skey
+cp keys/pool-keys/vrf.skey $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
+cp keys/pool-keys/opcert.cert $CNODE_HOME/priv/pool/$POOL_NAME/op.cert
+
+sudo chmod o-rwx $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
+sudo chmod g-rwx $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
+
+cp -r keys/utxo-keys/* $CNODE_HOME/initial-keys

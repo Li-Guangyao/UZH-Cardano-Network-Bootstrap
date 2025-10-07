@@ -1,5 +1,6 @@
 # UZH Cardano Network Bootstrap Node
 [0. Configure Shelley genesis file](#0-configure-shelley-genesis-file) \
+[0.1 Experience running the network](#01-experience-from-setting-up-a-2nd-network) \
 [1. Run a Bootstrap node](#1-run-bootstrap-nodes) \
 [2. Run a relay node](#2-run-a-relay-note) \
 [3. Run Cardano db sync](#3-run-cardano-db-sync) \
@@ -63,8 +64,21 @@ cardano-cli node key-hash-VRF --verification-key-file vrf.vkey
 
 ```
 
+## 0.1 Experience from setting up a 2nd network
+At the beginning of setting a new node of a new network, there might be 2 problems: 
+1. the network acts weird, e.g., setting up a relay node, but it is stuck on 'starting' ; 
+2. the blockfrost APIs, expecially the ones querying the details of a pool, cannot work properly (the most frequent bug is 'devide by 0').
+
+For the 1st problem, please shut up all the old network nodes because they are using the same chain id, e.g., 2025, which can led them join the new network.
+
+For the 2st problem, try to run a second staking pool and stake a few ADA. After a while when some parameter becomes not zero, the APIs works well.
+
+The components' version must also be paid attention to: cnode, 10.1.4; db-sync, 13.6; blockfrost, 4.0.0.
+
+
 
 ## 1. Run a Bootstrap node
+Please copy and paste every command in case that some environment variables don't take effect.
 
 ### Prerequisites
 
@@ -90,6 +104,14 @@ For cardano-node, we will use the latest pre-built binaries available which can 
 
 . "${HOME}/.bashrc"
 ```
+
+This command will download Cardano Node 10.1.4.
+
+### Modify topology file
+This network enables P2P by writting some configs in "templates/cardano-node.json" file. So, the topology.json cannot be blank (especially without "localRoots")
+
+Please open and edit  "topology.json" before the following steps.
+
 
 ### Update node producer pool name 
 Before you go ahead with starting your node, update value for POOL_NAME in $CNODE_HOME/scripts/env.
@@ -180,17 +202,17 @@ $CNODE_HOME/scripts/gLiveView.sh
 
 In case you see the node exit unsuccessfully upon checking status, please verify you've followed the transition process correctly as documented below, and that you do not have another instance of node already running. It would help to check your system logs (/var/log/syslog for debian-based and /var/log/messages for Red Hat/CentOS/Fedora systems, you can also check journalctl -f -u <service> to examine startup attempt for services) for any errors while starting node.
 
-### Generate Addresses and fund:
+<!-- ### Generate Addresses and fund: -->
 
-```bash
+<!-- ```bash
 cd scripts
 ./step1-generate-utxo-keys-and-address.sh
-```
+``` -->
 
 Send funds to the address from the bootstrap node:
 ```bash
 cd scripts
-./faucet.sh <AMOUNT_IN_LOVELACE> <ADDRESS>
+./send_ada.sh <AMOUNT_IN_LOVELACE> <ADDRESS>
 ```
 
 ## 2. Run a Relay node
@@ -222,6 +244,21 @@ Ensure the following tools and dependencies are installed:
 - Cardano Node
 - Git
 ---
+
+### Postgres config
+In our setting, the database user and password are all 'postgres'. After install Postgresql on Ubuntu by:
+```base
+sudo apt install postgresql
+```
+we do the following configs:
+```bash
+sudo su postgres
+psql -U postgres
+alter user postgres with password 'postgres';
+```
+
+After this step, if you want the data to be accessible everywhere, follow this guidance to config postgresql: https://chatgpt.com/s/t_68e414a001308191ad620b674d2ec455
+
 
 ### Configure dbsync.json
 ```bash
@@ -312,6 +349,8 @@ journalctl -u cnode-dbsync -n 100
 
 ### Verify DB Sync
 ```bash
+sudo su postgres
+
 psql cexplorer
 SELECT count(*) FROM tx_in;
 ```
@@ -394,7 +433,6 @@ crontab -e
 ```bash
 cd ~/git
 git clone https://github.com/blockfrost/blockfrost-backend-ryo
-cd blockfrost-backend-ryo
 ```
 
 ### Configure development.yaml
@@ -419,6 +457,7 @@ network: "preview"
 ```
 
 ### Run Blockfrost in Docker
+Go into the blockfrost folder and do:
 ```bash
 sudo apt install docker.io
 sudo docker run --rm \
@@ -438,8 +477,10 @@ sudo docker run --rm \
   -e BLOCKFROST_CONFIG_DBSYNC_PASSWORD=postgres \
   -e BLOCKFROST_CONFIG_TOKEN_REGISTRY_URL="https://metadata.world.dev.cardano.org" \
   -v $PWD/config:/app/config \
-  blockfrost/backend-ryo:latest
+  blockfrost/backend-ryo:v4.0.0
 ```
+Please be noted that the version should not be bigger than 4.0.0. In late May 2025 there was a big update (v4.1.0) supporting "calidus keys (CIP-0151) in /pools/:pool_id endpoint" indicated at https://github.com/blockfrost/blockfrost-backend-ryo/releases.
+
 
 ### Configure Submit API
 ```bash
@@ -523,8 +564,22 @@ server {
   
     # Sets the maximum allowed size of the client request body.
     client_max_body_size               0;
-
 }
+}
+
+server {
+    listen 80;
+    server_name uzhcardano.blockchain-group.ch;
+
+    location / {
+        proxy_pass http://127.0.0.1:81;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
 
 sudo nginx -t  # check if the configure is right
 sudo systemctl restart nginx

@@ -1,5 +1,5 @@
 {
-    "epochLength": 86400,
+    "epochLength": 2000,
     "activeSlotsCoeff": 0.05,
     "slotLength": 1,
     "securityParam": 10,
@@ -10,7 +10,7 @@
     "maxKESEvolutions": 62,
     "maxLovelaceSupply": 45000000000000000,
     "networkId": "Testnet",
-    "networkMagic": 2024,
+    "networkMagic": 2025,
     "protocolParams": {
         "a0": 0.3,
         "decentralisationParam": 0,
@@ -40,7 +40,7 @@
         "pools": {
             "8a219b698d3b6e034391ae84cee62f1d76b6fbc45ddfe4e31e0d4b60": {
                 "cost": 340000000,
-                "margin": 0.0,
+                "margin": 1.0,
                 "metadata": null,
                 "owners": [],
                 "pledge": 0,
@@ -59,6 +59,6 @@
             "f0d61499f0f82264937e44605cba03bb59062fe8a2233b179c8f64d7": "8a219b698d3b6e034391ae84cee62f1d76b6fbc45ddfe4e31e0d4b60"
         }
     },
-    "systemStart": "2025-05-07T20:04:08Z",
+    "systemStart": "2025-10-07T11:26:04Z",
     "updateQuorum": 1
 }
